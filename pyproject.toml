@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ctf-toolkit"
+version = "0.1.0"
+description = "Swiss-army CLI for CTF challenges: ciphers, encoders, hash ID, frequency analysis."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [{ name = "@forgehk", email = "info@darkforgeai.com" }]
+keywords = ["ctf", "security", "cryptography", "ciphers", "hash"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Security :: Cryptography",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+ctf = "ctf_toolkit.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ctf_toolkit*"]

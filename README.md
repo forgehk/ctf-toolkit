@@ -2,7 +2,7 @@
 
 > A swiss-army CLI for CTF challenges and offensive-security warm-ups. Classical ciphers, encoders, hash identification, and quick recon helpers — one binary, no dependencies.
 
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)]() [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/forgehk/ctf-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/forgehk/ctf-toolkit/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)]() [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 

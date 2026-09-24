@@ -31,6 +31,9 @@ ctf hash id "5d41402abc4b2a76b9719d911017c592"
 
 ctf hash crack --algo md5 --wordlist rockyou.txt 5f4dcc3b5aa765d61d8327deb882cf99
 # → password
+
+ctf rsa small-e --e 3 --n 2831...(large) --c 12026...(large)
+# → m = 22910...  decoded: CTF{low_exponent}
 ```
 
 ---
@@ -62,6 +65,16 @@ ctf hash crack --algo md5 --wordlist rockyou.txt 5f4dcc3b5aa765d61d8327deb882cf9
 - `hash id <digest>` — guess the algorithm from the digest length and shape
 - `hash compute --algo md5|sha1|sha256|sha512 <text>` — compute digest
 - `hash crack --algo X --wordlist file <digest>` — dictionary attack
+
+### `rsa` — attacks on weak RSA parameters
+
+Textbook RSA falls to a handful of classic conditions that turn up constantly in CTFs. Each breaker is implemented from first principles (integer `e`-th roots, extended Euclid, continued fractions) — no crypto libraries.
+
+- `rsa small-e --e E --n N --c C` — low public exponent where `m**e < n`, so the ciphertext never wrapped and `m` is the exact integer `e`-th root of `c`
+- `rsa common-modulus --n N --e1 E1 --c1 C1 --e2 E2 --c2 C2` — one message sent under a shared modulus with two coprime exponents; recovered with Bézout's identity
+- `rsa wiener --e E --n N` — Wiener's attack: recovers a small private exponent `d` from the continued-fraction convergents of `e/n`
+
+Recovered integers are printed and, when they decode as UTF-8, shown as text.
 
 ### `text` — entropy and frequency analysis
 
@@ -111,7 +124,7 @@ Two commands, one solve.
 - [x] Classical ciphers (Caesar, Caesar brute, Vigenère, XOR, Atbash)
 - [x] Hash identification + wordlist crack
 - [x] Entropy + frequency analysis
-- [ ] RSA helpers (small-e, common-modulus, Wiener's attack)
+- [x] RSA helpers (small-e, common-modulus, Wiener's attack)
 - [ ] Steganography helpers (LSB extract, strings on images)
 - [ ] PCAP quick-look (extract HTTP/DNS/credentials)
 - [ ] CTF write-up template generator

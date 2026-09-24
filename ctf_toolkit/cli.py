@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import ciphers, encoders, hashes, textstats
+from . import ciphers, encoders, hashes, rsa, textstats
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
@@ -71,6 +71,33 @@ def main(argv: list[str] | None = None) -> int:
     t_freq = t_sub.add_parser("freq", help="Letter frequency table.")
     t_freq.add_argument("data")
 
+    # rsa subcommands
+    r = sub.add_parser("rsa", help="RSA attacks for weak-parameter challenges.")
+    r_sub = r.add_subparsers(dest="rsa_cmd", required=True)
+
+    r_small = r_sub.add_parser(
+        "small-e", help="Low-exponent attack (m**e < n): integer e-th root of c."
+    )
+    r_small.add_argument("--e", required=True, type=int)
+    r_small.add_argument("--n", required=True, type=int)
+    r_small.add_argument("--c", required=True, type=int)
+
+    r_common = r_sub.add_parser(
+        "common-modulus",
+        help="Common-modulus attack: one message, one n, two coprime exponents.",
+    )
+    r_common.add_argument("--n", required=True, type=int)
+    r_common.add_argument("--e1", required=True, type=int)
+    r_common.add_argument("--c1", required=True, type=int)
+    r_common.add_argument("--e2", required=True, type=int)
+    r_common.add_argument("--c2", required=True, type=int)
+
+    r_wiener = r_sub.add_parser(
+        "wiener", help="Wiener's attack: recover a small private exponent d."
+    )
+    r_wiener.add_argument("--e", required=True, type=int)
+    r_wiener.add_argument("--n", required=True, type=int)
+
     args = parser.parse_args(argv)
     return _dispatch(args)
 
@@ -86,6 +113,8 @@ def _dispatch(args: argparse.Namespace) -> int:
             _dispatch_hash(args)
         elif args.command == "text":
             _dispatch_text(args)
+        elif args.command == "rsa":
+            _dispatch_rsa(args)
         else:
             print(f"unknown command: {args.command}", file=sys.stderr)
             return 2
@@ -130,6 +159,31 @@ def _dispatch_text(args: argparse.Namespace) -> None:
         for letter, freq in table.items():
             bar = "█" * int(freq * 100)
             print(f"  {letter}  {freq*100:5.2f}%  {bar}")
+
+def _dispatch_rsa(args: argparse.Namespace) -> None:
+    if args.rsa_cmd == "small-e":
+        m = rsa.small_e_attack(args.e, args.n, args.c)
+        if m is None:
+            print("no exact e-th root — message wrapped mod n, attack does not apply")
+            return
+        _print_recovered(m)
+    elif args.rsa_cmd == "common-modulus":
+        m = rsa.common_modulus_attack(args.n, args.e1, args.c1, args.e2, args.c2)
+        if m is None:
+            print("exponents are not coprime — attack does not apply")
+            return
+        _print_recovered(m)
+    elif args.rsa_cmd == "wiener":
+        d = rsa.wiener_attack(args.e, args.n)
+        print(f"d = {d}" if d is not None else "no small d found — attack does not apply")
+
+def _print_recovered(m: int) -> None:
+    print(f"m = {m}")
+    try:
+        text = rsa.int_to_bytes(m).decode("utf-8")
+        print(f"decoded: {text}")
+    except UnicodeDecodeError:
+        print(f"bytes (hex): {rsa.int_to_bytes(m).hex()}")
 
 if __name__ == "__main__":
     sys.exit(main())
